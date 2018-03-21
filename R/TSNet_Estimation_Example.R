@@ -1,3 +1,4 @@
+##### --- R Code to implement TSNet on Synthetic Data Examples
 
 ##### --------- Input Paramers for Synthetic Data Example
  p=200;     # -- p: number of genes
@@ -14,7 +15,7 @@
  betaSize=1            # -- Variance parameter of the beta distribution
 
  # --- Load Function
- source("/sc/orga/work/petraf01/TSNet.github/R/TSNet_function.R") 
+ source(".../R/TSNet_function.R") 
 
  # --- Simulate Data
  Data<-Synthetic_data(p=p,rep=rep,n=n,cluster=2,parameterseed=1,
