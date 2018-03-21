@@ -2,9 +2,14 @@
 Evaluate_network<-function(TSNet,Data){ 
  
   # -- Performance evaluation in estimating tumor-purity based on synthetic data
+  
+  # -- INPUT
   # -- TSNet: object returned by function deNet
   # -- Data:  object returned by function Synthetic_data
 
+  # -- OUTPUT
+  # -- True Positive and False Positive in detecting network edges for both tumor and non-tumor networks
+ 
   # --- Edges in True Networks  
   p<-dim(Data$Sigmay)[1]
   cutoff=1E-3;
