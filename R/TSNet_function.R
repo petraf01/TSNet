@@ -54,7 +54,6 @@ simulateDataN<-function(dn,cluster,sn,parameterseed,dataseed,meanY=NULL,meanZ=NU
   
   if(is.null(P.v))
   {
-    #realP<-runif(sn)*0.6+0.2
     meanP<-0.5;
     varP<-0.04;
     sizeP<-meanP*(1-meanP)/varP-1
@@ -202,11 +201,6 @@ PowerLaw.net<-function(p, lib.loc=NULL, umin=0.5, umax=1, power=1, flip=TRUE, fa
   }
   
   ParCor.gen<-GenPar(adj,umin=umin,umax=umax,flip=flip,factor=factor)
-  ##generate original "paratial correlation"
-  ##check whether the generatee partial correlation is p.d?
-  #all(eigen(ParCor.gen)$values>0)                         ##p.d.?
-  
-  ##truncation the partial correlations to make small ones larger
   temp=range(ParCor.gen[upper.tri(ParCor.gen)])
   print(temp)
   ParCor.trun<-ParCor.gen
@@ -214,9 +208,6 @@ PowerLaw.net<-function(p, lib.loc=NULL, umin=0.5, umax=1, power=1, flip=TRUE, fa
   ParCor.trun[index]=runif(min=-thre,max=-thre,n=sum(index))
   index<-ParCor.gen<thre  & ParCor.gen>1e-6
   ParCor.trun[index]=runif(min=thre,max=thre,n=sum(index))
-  #all(eigen(ParCor.trun)$values>0)                        ##still p.d.?
-  
-  ##get covariance matrix and save in Sig.Rdata
   diag(ParCor.trun)<-1
   Sig<-GenCov(ParCor.trun)
   
@@ -250,12 +241,8 @@ Empi.net<-function(p, umin=0.5,umax=1, factor=1.5){
   diag(net.adj)<-0
   
   ParCor.gen<-GenPar(net.adj,umin,umax,flip=TRUE,factor=factor) 
-  ##generate original "paratial correlation"
-  
-  ##check whether the generatee partial correlation is p.d?
   all(eigen(ParCor.gen)$values>0)                         ##p.d.?
   
-  ##truncation the partial correlations to make small ones larger
   thre<-0.1
   ParCor.trun<-ParCor.gen
   index<-ParCor.gen>(-thre) & ParCor.gen<(-1e-6)
@@ -264,16 +251,14 @@ Empi.net<-function(p, umin=0.5,umax=1, factor=1.5){
   ParCor.trun[index]=runif(min=thre,max=thre,n=sum(index))
   all(eigen(ParCor.trun)$values>0)                        ##still p.d.?
   
-  ##get covariance matrix and save in Sig.Rdata
   Sig<-GenCov(ParCor.trun) 
   
-  ##
   return(Sig)
 }
 
 
 
-######## generate starr based network: three hubs 
+######## generate star based network: three hubs 
 Star.net<-function(p,hub.no=3,hub.size=16,umin=0.5,umax=1){
   
   degree.gen<-sample(1:3,p,replace=T)
@@ -287,12 +272,8 @@ Star.net<-function(p,hub.no=3,hub.size=16,umin=0.5,umax=1){
   
   
   ParCor.gen<-GenPar(net.adj,umin,umax,flip=TRUE,factor=1.5) 
-  ##generate original "paratial correlation"
-  
-  ##check whether the generatee partial correlation is p.d?
   all(eigen(ParCor.gen)$values>0)                         ##p.d.?
   
-  ##truncation the partial correlations to make small ones larger
   thre<-0.1
   
   
@@ -300,7 +281,6 @@ Star.net<-function(p,hub.no=3,hub.size=16,umin=0.5,umax=1){
   ParCor.trun[abs(ParCor.gen)<thre&abs(ParCor.gen)>0]<-thre
   all(eigen(ParCor.trun)$values>0)                        ##still p.d.?
   
-  ##get covariance matrix and save in Sig.Rdata
   Sig<-GenCov(ParCor.trun) 
   
   ##
@@ -313,7 +293,6 @@ Star.net<-function(p,hub.no=3,hub.size=16,umin=0.5,umax=1){
 ######generate MB network: simulate connecting matrix
 MB.net.connect<-function(p, max.edge=4)
 {
-  # p=10
   
   coordi.m<-matrix(runif(p*2, min=0, max=1), ncol=2)
   d.m<-as.matrix(dist(coordi.m))
@@ -535,22 +514,10 @@ Mstep.v2<-function(Ey,Ez,Esigmay,Esigmaz,rhoy=rhoy, rhoz=rhoz, Uy,Uz)
   if(missing(Uy))Uy=apply(Ey,2,mean);
   if(missing(Uz))Uz=apply(Ez,2,mean);
   
-  #temp<-matrix(0,p, p)
-  #for(i in 1:n)
-  #  {
-  #    temp<-temp+(Ey[i,]-Uy)%*%t(Ey[i,]-Uy)
-  #  }
-  # Sy<-temp/n+Esigmay;
   temp=matrix(Uy, nrow=n, ncol=p, byrow=T)
   Sy=t(Ey-temp)%*%(Ey-temp)/n+Esigmay
   Sigmay<-glasso(Sy,rhoy, penalize.diagonal=FALSE)$w;
   
-  #temp<-matrix(0,p, p)
-  #for(i in 1:n)
-  #  {
-  #    temp<-temp+(Ez[i,]-Uz)%*%t(Ez[i,]-Uz)
-  #  }
-  #Sz<-temp/n+Esigmaz;
   temp=matrix(Uz, nrow=n, ncol=p, byrow=T)
   Sz=t(Ez-temp)%*%(Ez-temp)/n+Esigmaz
   Sigmaz<-glasso(Sz,rhoz, penalize.diagonal=FALSE)$w;
@@ -588,7 +555,6 @@ Mstep<-function(Ey,Ez,Esigmay,Esigmaz,rho=rho,Uy,Uz)
   }
   Sz<-temp/n+Esigmaz;
   Sigmaz<-glasso(Sz,rho)$w;
-  #Sigmaz<-Sz
   
   list(Uy=Uy,Uz=Uz,Sigmay=Sigmay,Sigmaz=Sigmaz)
 }
@@ -969,8 +935,7 @@ while(i<5000)
   if(length(badpoints)>0)
   {
     
-    #    print(paste("remove bad points",badpoints));
-    exprM<-exprM[,-c(badpoints)];
+     exprM<-exprM[,-c(badpoints)];
     curgeneNames<-curgeneNames[-c(badpoints)];
     rnew$Uy<-rnew$Uy[-c(badpoints)];
     rnew$Uz<-rnew$Uz[-c(badpoints)];
@@ -985,12 +950,9 @@ while(i<5000)
   }
   
   LL.temp<-c(LL.temp, calculateLL(rnew$Uy,rnew$Uz,rnew$Sigmay,rnew$Sigmaz,c.scale=1,exprM,Epurity))
-  # print(paste("edgeN",sum(abs(ginv(rnew$Sigmay)[upper.tri(rnew$Sigmay)])>0.001)))
-  #  print(paste("edgeN",sum(abs(ginv(rnew$Sigmaz)[upper.tri(rnew$Sigmaz)])>0.001)))
   
   if(abs(LL.temp[i+1]-LL.temp[i])<convergecutoff) # -- break when log likelihood converges
   { break()}else{
-    # print(abs(LL.temp[i+1]-LL.temp[i]))
     
   }
   i<-i+1;
